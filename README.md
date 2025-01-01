@@ -5,9 +5,9 @@
 1. U need to update & upgrade ``apt update && upgrade``
 2. screen -S haust
 3. Then, ``git clone https://github.com/asamarsal/haust-autotx/``
-4. ``nano .env``
-5. input your private key and save
-6. ``cd haus-autotx``
+4. ``cd haus-autotx``
+5. ``nano .env``
+6. input your private key and save
 7. ``pip3 install web3``
 8. ``pip3 install python-dotenv``
 9. ``python3 haus-auto-tx.py``
