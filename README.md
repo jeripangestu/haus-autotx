@@ -3,17 +3,20 @@
 ## Run it on vps or cmd
 
 1. U need to update & upgrade ``apt update && upgrade``
-2. screen -S haust
-3. Then, ``git clone https://github.com/asamarsal/haust-autotx/``
-4. ``cd haust-autotx``
+2. screen -S haus
+3. Then, ``git clone https://github.com/dwisyafriadi2/haus-autotx/``
+4. ``cd haus-autotx``
 5. ``pip3 install web3``
 6. ``pip3 install python-dotenv``
-7. ``python3 haus-auto-tx.py``
-8. Input your private key, address, recipient address, min-max amount, min and max delay time.
-9. Ctrl + A + D
-10. Enjoy
+7. ``pip3 install rich``
+8. Input your private key on `.env`
+9. then ``python3 haus-auto-tx.py``
+10. if you don't have haust token you can claim faucet first
+11. ``python3 faucet-bot.py``
+12. Ctrl + A + D
+13. Enjoy
 
-You can back to your screen ``screen -r haust``
+You can back to your screen ``screen -r haus``
 
 If u guys interested with many testnet automation and bot, you can find dasar pemulung on youtube and telegram
 

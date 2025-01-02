@@ -1,92 +1,65 @@
 import random
 import time
-import os
-import requests
 from web3 import Web3
 from dotenv import load_dotenv
-
-# Prompt user to input the private key
-private_key_input = input("Enter your private key: ").strip()
-
-# File .env path
-env_file_path = ".env"
-
-# Update or create .env file with the new private key
-if os.path.exists(env_file_path):
-    with open(env_file_path, "r") as file:
-        lines = file.readlines()
-    
-    with open(env_file_path, "w") as file:
-        for line in lines:
-            if line.startswith("PRIVATE_KEY="):
-                file.write(f"PRIVATE_KEY={private_key_input}\n")
-            else:
-                file.write(line)
-else:
-    # Create .env if it doesn't exist
-    with open(env_file_path, "w") as file:
-        file.write(f"PRIVATE_KEY={private_key_input}\n")
-
-print("✅ Private key updated in .env file.")
+import os
+from threading import Thread
+from rich.console import Console
+from rich.table import Table
+from rich import box
 
 # Load environment variables
 load_dotenv()
 
-# User Configurations (Replace with your own or use .env)
-PRIVATE_KEY = os.getenv('PRIVATE_KEY')  # Add your private key to .env
-SENDER_ADDRESS = input("Enter your wallet address: ").strip()
-RECIPIENT_ADDRESS = input("Enter the recipient wallet address: ").strip()
+# Initialize console for better output
+console = Console()
+
+# User Configurations
+with open(".env", "r") as file:
+    PRIVATE_KEYS = [line.strip() for line in file if line.strip()]  # Read all private keys line by line
+
+if not PRIVATE_KEYS:
+    raise ValueError("No private keys found in .env file!")
+
 MIN_AMOUNT = float(input("Enter minimum transfer amount: ").strip())
 MAX_AMOUNT = float(input("Enter maximum transfer amount: ").strip())
-LOOP_COUNT = int(input("Enter the number of transactions to loop: ").strip())
-
-# Sleep time settings
-MIN_SLEEP_TIME = int(input("Enter the minimum sleep time (seconds): ").strip())
-MAX_SLEEP_TIME = int(input("Enter the maximum sleep time (seconds): ").strip())
 
 # Haust Testnet Configuration
 RPC_URL = "https://rpc-test.haust.network"
 CHAIN_ID = 1570754601
 CURRENCY_SYMBOL = "HAUST"
-EXPLORER_URL = "https://explorer-test.haust.network"
 
 # Connect to Blockchain
 web3 = Web3(Web3.HTTPProvider(RPC_URL))
+if not web3.is_connected():
+    console.print("[bold red]❌ Failed to connect to Haust Testnet![/bold red]")
+    raise ConnectionError("Failed to connect to Haust Testnet!")
 
-# Verify Connection
-if web3.is_connected():
-    print(f"✅ Connected to Haust Testnet ({RPC_URL})")
-else:
-    raise ConnectionError("❌ Failed to connect to Haust Testnet!")
+console.print(f"[bold green]✅ Connected to Haust Testnet ({RPC_URL})[/bold green]")
 
-# Derive sender address from private key if not input directly
-if not SENDER_ADDRESS:
-    SENDER_ADDRESS = web3.eth.account.from_key(PRIVATE_KEY).address
-print(f"🔑 Wallet Address: {SENDER_ADDRESS}")
+# Get addresses from private keys
+def get_addresses_from_private_keys(keys):
+    addresses = []
+    for key in keys:
+        address = web3.eth.account.from_key(key).address
+        addresses.append(address)
+    return addresses
 
-# Function to fetch balance from the API
-def get_balance_from_explorer(address):
-    try:
-        url = f"https://explorer-test.haust.network/api/v2/addresses/{address}/coin-balance-history-by-day"
-        response = requests.get(url)
-        response.raise_for_status()  # Check for successful response
+# Add addresses to address.txt
+private_key_addresses = get_addresses_from_private_keys(PRIVATE_KEYS)
+with open("address.txt", "a+") as file:
+    file.seek(0)
+    existing_addresses = {line.strip() for line in file if line.strip()}
+    for address in private_key_addresses:
+        if address not in existing_addresses:
+            file.write(address + "\n")
 
-        # Parse the response JSON
-        data = response.json()
-        
-        # Extract the balance value
-        balance_wei = int(data['items'][0]['value'])
-        
-        # Convert Wei to HAUST
-        balance_haust = balance_wei / 1e18
-        
-        print(f"🔍 Current Balance for {address}: {balance_haust:.7f} HAUST")
-        return balance_haust
-    except Exception as e:
-        print(f"❌ Failed to fetch balance: {e}")
-        return None
+# Load recipient addresses
+with open("address.txt", "r") as file:
+    recipient_addresses = [line.strip() for line in file if line.strip()]
+if not recipient_addresses:
+    raise ValueError("No recipient addresses found in address.txt.")
 
-# Function to send a transaction
 def send_transaction(sender, recipient, amount, private_key):
     try:
         nonce = web3.eth.get_transaction_count(sender)
@@ -103,48 +76,50 @@ def send_transaction(sender, recipient, amount, private_key):
 
         signed_tx = web3.eth.account.sign_transaction(tx, private_key)
         tx_hash = web3.eth.send_raw_transaction(signed_tx.raw_transaction)
-        
-        print(f"✅ Transaction sent! Tx Hash: {tx_hash.hex()}")
-        print(f"🔗 Explorer: {EXPLORER_URL}/tx/{tx_hash.hex()}")
+
+        console.print(f"[bold green]✅ Transaction Successful![/bold green] [blue]Tx Hash:[/blue] {tx_hash.hex()}")
         return tx_hash.hex()
 
     except Exception as e:
-        print(f"❌ Transaction failed: {e}")
+        console.print(f"[bold red]❌ Transaction failed:[/bold red] {e}")
         return None
 
-# Main Loop for Transactions
-def main():
-    for i in range(LOOP_COUNT):
+def process_transactions_for_key(private_key, recipient_addresses):
+    sender_address = web3.eth.account.from_key(private_key).address
+    console.print(f"\n[bold cyan]🔑 Starting transactions for Private Key:[/bold cyan] {sender_address}")
+
+    for recipient_address in recipient_addresses:
         amount = random.uniform(MIN_AMOUNT, MAX_AMOUNT)
-        print(f"\n🔄 Loop {i + 1}/{LOOP_COUNT}")
-        print(f"💸 Sending {amount:.6f} {CURRENCY_SYMBOL} to {RECIPIENT_ADDRESS}")
-        
-        tx_hash = send_transaction(SENDER_ADDRESS, RECIPIENT_ADDRESS, amount, PRIVATE_KEY)
-        
-        if tx_hash:
-            print(f"✅ Transaction Successful: {tx_hash}")
-##Update dari bang XM
-            # Fetch the latest balance after the transaction
-            get_balance_from_explorer(SENDER_ADDRESS)
-            # Delay with random sleep time between 8 and 15 seconds
-            sleep_time = random.randint(8, 15)
-            print(f"⏳ Waiting for {sleep_time} seconds before the next transaction...")
-            time.sleep(sleep_time)
-##Update dari bang XM
-        else:
-            print("❌ Transaction Failed, stopping further execution.")
-            break
+        console.print(f"[yellow]💸 Sending {amount:.6f} {CURRENCY_SYMBOL} from {sender_address} to {recipient_address}[/yellow]")
 
-        # Random sleep time between MIN_SLEEP_TIME and MAX_SLEEP_TIME
-        sleep_time = random.randint(MIN_SLEEP_TIME, MAX_SLEEP_TIME)
-        print(f"⏳ Sleeping for {sleep_time} seconds...")
-        time.sleep(sleep_time)
+        tx_hash = send_transaction(sender_address, recipient_address, amount, private_key)
+        time.sleep(random.randint(12, 25))
 
-# Entry Point
+# Main Loop for Multithreading
+def main():
+    while True:  # Infinite loop to repeat the process
+        threads = []
+        table = Table(title="Transaction Summary", box=box.DOUBLE_EDGE)
+        table.add_column("Private Key", style="cyan", justify="center")
+        table.add_column("Recipient Address", style="magenta", justify="center")
+        table.add_column("Amount", style="green", justify="center")
+        table.add_column("Status", style="bold")
+
+        for private_key in PRIVATE_KEYS:
+            thread = Thread(target=process_transactions_for_key, args=(private_key, recipient_addresses))
+            threads.append(thread)
+            thread.start()
+
+        # Wait for all threads to finish
+        for thread in threads:
+            thread.join()
+
+        console.print("[bold magenta]🔄 All private keys processed. Restarting the loop...[/bold magenta]")
+
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print("\n🛑 Script terminated by user.")
+        console.print("[bold red]\n🛑 Script terminated by user.[/bold red]")
     except Exception as e:
-        print(f"❌ Unexpected Error: {e}")
+        console.print(f"[bold red]❌ Unexpected Error:[/bold red] {e}")
