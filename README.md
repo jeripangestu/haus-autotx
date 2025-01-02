@@ -1,11 +1,21 @@
-## Haus Network Automation Transfer 
-## How to run on vps/linux/ubuntu/termux
-1. "git clone https://github.com/dwisyafriadi2/haus-autotx.git"
-2. "cd haus-autotx"
-3. "nano .env" (Paste your private key)
-4. "python3 haus-auto-tx.py"
+# Haus Network Auto Tx
 
-or
+## Run it on vps or cmd
+
+1. U need to update & upgrade ``apt update && upgrade``
+2. screen -S haust
+3. Then, ``git clone https://github.com/asamarsal/haust-autotx/``
+4. ``cd haust-autotx``
+5. ``pip3 install web3``
+6. ``pip3 install python-dotenv``
+7. ``python3 haus-auto-tx.py``
+8. Input your private key, address, recipient address, min-max amount, min and max delay time.
+9. Ctrl + A + D
+10. Enjoy
+
+You can back to your screen ``screen -r haust``
+
+If u guys interested with many testnet automation and bot, you can find dasar pemulung on youtube and telegram
 
 ## How to run on windows
 1. Click Code 
@@ -18,4 +28,6 @@ or
 [Telegram Channel](https://t.me/dasarpemulung)
 
 ## Tutorial Video
+
 [Tutorial With Video](https://youtu.be/i-87X0Zu_d8?si=dRZYh7zsO_1Eklot)
+
