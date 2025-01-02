@@ -9,10 +9,12 @@
 5. ``pip3 install web3``
 6. ``pip3 install python-dotenv``
 7. ``pip3 install rich``
-8. ``python3 haus-auto-tx.py``
-9. Input your private key on `.env`
-10. Ctrl + A + D
-11. Enjoy
+Input your private key on `.env`
+8. then ``python3 haus-auto-tx.py``
+9. if you don't have haust token you can claim faucet first
+10. ``python3 faucet-bot.py``
+11. Ctrl + A + D
+12. Enjoy
 
 You can back to your screen ``screen -r haus``
 
