@@ -5,6 +5,30 @@ import requests
 from web3 import Web3
 from dotenv import load_dotenv
 
+# Prompt user to input the private key
+private_key_input = input("Enter your private key: ").strip()
+
+# File .env path
+env_file_path = ".env"
+
+# Update or create .env file with the new private key
+if os.path.exists(env_file_path):
+    with open(env_file_path, "r") as file:
+        lines = file.readlines()
+    
+    with open(env_file_path, "w") as file:
+        for line in lines:
+            if line.startswith("PRIVATE_KEY="):
+                file.write(f"PRIVATE_KEY={private_key_input}\n")
+            else:
+                file.write(line)
+else:
+    # Create .env if it doesn't exist
+    with open(env_file_path, "w") as file:
+        file.write(f"PRIVATE_KEY={private_key_input}\n")
+
+print("✅ Private key updated in .env file.")
+
 # Load environment variables
 load_dotenv()
 
