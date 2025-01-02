@@ -6,13 +6,11 @@
 2. screen -S haust
 3. Then, ``git clone https://github.com/asamarsal/haust-autotx/``
 4. ``cd haust-autotx``
-5. ``nano .env``
-6. input your private key and save
-7. ``pip3 install web3``
-8. ``pip3 install python-dotenv``
-9. ``python3 haus-auto-tx.py``
-10. Input your address, recipient address, min and max delay time.
-11. Ctrl + A + D
-12. Enjoy
+5. ``pip3 install web3``
+6. ``pip3 install python-dotenv``
+7. ``python3 haus-auto-tx.py``
+8. Input your private key, address, recipient address, min-max amount, min and max delay time.
+9. Ctrl + A + D
+10. Enjoy
 
 You can back to your screen ``screen -r haust``
