@@ -1,4 +1,4 @@
-﻿# Haus Network Auto Tx
+# Haus Network Auto Tx
 
 ## Run it on vps or cmd
 
@@ -17,11 +17,17 @@ You can back to your screen ``screen -r haust``
 
 If u guys interested with many testnet automation and bot, you can find dasar pemulung on youtube and telegram
 
-## Credit to Channel Dasar Pemulung on Youtube
-https://www.youtube.com/@dasarpemulung
+## How to run on windows
+1. Click Code 
+2. Click "Download Zip"
+3. Extract file
+4. Edit .env (paste your private key)
+5. double click haus-auto-tx.py
 
 ## Join Telegram Channel
 [Telegram Channel](https://t.me/dasarpemulung)
 
 ## Tutorial Video
+
 [Tutorial With Video](https://youtu.be/i-87X0Zu_d8?si=dRZYh7zsO_1Eklot)
+
