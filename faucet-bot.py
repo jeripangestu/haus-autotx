@@ -1,29 +1,29 @@
-# faucet-bot.py
-
 import os
 import requests
 import random
 from web3 import Web3
 from dotenv import load_dotenv
+from threading import Thread
+from time import sleep
 
 # Load environment variables
 load_dotenv()
 
 # Configuration
-PRIVATE_KEY = os.getenv('PRIVATE_KEY')
 FAUCET_API_URL = "https://faucet-test.haust.network/api/claim"
 PROXY_FILE = "proxylist.txt"
 
-
-# Connect to a wallet and extract the address
-def get_wallet_address(private_key):
+# Load private keys from .env
+def load_private_keys(env_file=".env"):
     try:
-        account = Web3().eth.account.from_key(private_key)
-        return account.address
+        with open(env_file, "r") as file:
+            private_keys = [line.strip() for line in file if line.strip()]
+        if not private_keys:
+            raise ValueError("No private keys found in .env file.")
+        return private_keys
     except Exception as e:
-        print(f"❌ Failed to derive wallet address: {e}")
-        return None
-
+        print(f"❌ Error loading private keys: {e}")
+        exit()
 
 # Load proxies from file
 def load_proxies(file_path):
@@ -32,7 +32,7 @@ def load_proxies(file_path):
             print(f"⚠️ Proxy file '{file_path}' not found. Running without proxies.")
             return []
         
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             proxies = [line.strip() for line in file if line.strip()]
         
         if not proxies:
@@ -43,13 +43,16 @@ def load_proxies(file_path):
         print(f"❌ Error loading proxies: {e}")
         return []
 
+# Connect to a wallet and extract the address
+def get_wallet_address(private_key):
+    try:
+        account = Web3().eth.account.from_key(private_key)
+        return account.address
+    except Exception as e:
+        print(f"❌ Failed to derive wallet address: {e}")
+        return None
 
-# Select a random proxy
-def get_random_proxy(proxies):
-    return random.choice(proxies) if proxies else None
-
-
-# Make a faucet request with or without a proxy
+# Make a faucet request with a proxy
 def request_faucet(address, proxy=None):
     payload = {
         "address": address
@@ -94,53 +97,51 @@ def request_faucet(address, proxy=None):
         print(f"❌ Error during faucet request: {e}")
         return None
 
-
-# Main Function
-def main():
-    if not PRIVATE_KEY:
-        print("❌ PRIVATE_KEY is not set in the .env file.")
-        return
-    
-    print("🔑 Extracting wallet address from private key...")
-    wallet_address = get_wallet_address(PRIVATE_KEY)
+# Threaded faucet process for each PK-proxy pair
+def faucet_process(private_key, proxy):
+    wallet_address = get_wallet_address(private_key)
     
     if not wallet_address:
-        print("❌ Could not derive wallet address. Exiting...")
+        print(f"❌ Could not derive wallet address for Private Key: {private_key}. Skipping...")
         return
     
-    print(f"✅ Wallet Address: {wallet_address}")
-    
-    # Load and validate proxies
-    proxies = load_proxies(PROXY_FILE)
-    use_proxy = len(proxies) > 0
-    
-    if use_proxy:
-        print(f"✅ Loaded {len(proxies)} proxies. Proxies will be used.")
-    else:
-        print("⚠️ No proxies loaded. Running without proxies.")
-    
     success = False
-    attempts = 0
-    max_attempts = len(proxies) if use_proxy else 1  # At least one attempt without proxies
-    
-    while not success and attempts < max_attempts:
-        proxy = get_random_proxy(proxies) if use_proxy else None
-        if proxy and use_proxy:
-            proxies.remove(proxy)  # Remove used proxy
-        attempts += 1
-        
-        print(f"🚀 Attempt {attempts}/{max_attempts}")
+    while not success:  # Keep looping until success
+        print(f"🔑 Wallet Address: {wallet_address} | Proxy: {proxy if proxy else 'No Proxy'}")
         tx_hash = request_faucet(wallet_address, proxy)
         
         if tx_hash:
             print(f"🎉 Success! Transaction Hash: {tx_hash}")
             success = True
         else:
-            print("❌ Faucet claim failed. Trying again...\n")
-    
-    if not success:
-        print("❌ All attempts failed. Please check your proxy list or connection.")
+            print(f"❌ Faucet claim failed for Wallet: {wallet_address}. Retrying in 10 seconds...")
+            sleep(10)
 
+# Main function
+def main():
+    # Load private keys and proxies
+    private_keys = load_private_keys()
+    proxies = load_proxies(PROXY_FILE)
+
+    if not proxies:
+        proxies = [None] * len(private_keys)  # No proxies, use None for each PK
+    
+    if len(private_keys) != len(proxies):
+        print(f"❌ Mismatch: {len(private_keys)} private keys and {len(proxies)} proxies.")
+        print("Ensure each private key has a corresponding proxy in proxylist.txt.")
+        return
+
+    threads = []
+    for private_key, proxy in zip(private_keys, proxies):
+        thread = Thread(target=faucet_process, args=(private_key, proxy))
+        threads.append(thread)
+        thread.start()
+
+    # Wait for all threads to complete
+    for thread in threads:
+        thread.join()
+
+    print("✅ All faucet claims completed.")
 
 # Entry Point
 if __name__ == '__main__':
