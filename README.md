@@ -15,6 +15,8 @@
 
 You can back to your screen ``screen -r haust``
 
+If u guys interested with many testnet automation and bot, you can find dasar pemulung on youtube and telegram
+
 ## Credit to Channel Dasar Pemulung on Youtube
 https://www.youtube.com/@dasarpemulung
 
