@@ -123,14 +123,14 @@ def main():
         
         if tx_hash:
             print(f"✅ Transaction Successful: {tx_hash}")
-//Update dari bang XM
+##Update dari bang XM
             # Fetch the latest balance after the transaction
             get_balance_from_explorer(SENDER_ADDRESS)
             # Delay with random sleep time between 8 and 15 seconds
             sleep_time = random.randint(8, 15)
             print(f"⏳ Waiting for {sleep_time} seconds before the next transaction...")
             time.sleep(sleep_time)
-//Update dari bang XM
+##Update dari bang XM
         else:
             print("❌ Transaction Failed, stopping further execution.")
             break
