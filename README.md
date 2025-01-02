@@ -14,3 +14,12 @@
 10. Enjoy
 
 You can back to your screen ``screen -r haust``
+
+## Credit to Channel Dasar Pemulung on Youtube
+https://www.youtube.com/@dasarpemulung
+
+## Join Telegram Channel
+[Telegram Channel](https://t.me/dasarpemulung)
+
+## Tutorial Video
+[Tutorial With Video](https://youtu.be/i-87X0Zu_d8?si=dRZYh7zsO_1Eklot)
