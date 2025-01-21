@@ -12,8 +12,8 @@ load_dotenv()
 console = Console()
 
 # Haust Testnet Configuration
-RPC_URL = "https://rpc-test.haust.network"
-CHAIN_ID = 1570754601
+RPC_URL = "https://rpc-testnet.haust.app"
+CHAIN_ID = 1523903251
 CURRENCY_SYMBOL = "HAUST"
 
 # Connect to Blockchain
