@@ -10,7 +10,7 @@ from time import sleep
 load_dotenv()
 
 # Configuration
-FAUCET_API_URL = "https://faucet-test.haust.network/api/claim"
+FAUCET_API_URL = "https://faucet.haust.app/api/claim"
 PROXY_FILE = "proxylist.txt"
 
 # Load private keys from .env
